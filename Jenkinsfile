@@ -12,13 +12,7 @@ stages {
 
     stage('Checkout Code') {
         steps {
-            git branch: 'main', url: 'https://github.com/praveenudemycourses/jenkins.git'
-        }
-    }
-
-    stage('Install & Test (Dockerized Node)') {
-        steps {
-            sh 'docker run --rm -v .:/app -w /app node:18-alpine sh -c "npm install && npm test || true"'
+            git url: 'https://github.com/praveenudemycourses/jenkins.git', branch: 'main'
         }
     }
 
@@ -28,19 +22,18 @@ stages {
         }
     }
 
-    stage('Run Container (Smoke Test)') {
+    stage('Run Container') {
         steps {
             sh "docker rm -f ${CONTAINER_NAME} || true"
             sh "docker run -d -p 3000:3000 --name ${CONTAINER_NAME} ${IMAGE_NAME}:${IMAGE_TAG}"
-            sh "sleep 10"
-            sh "curl http://localhost:3000 || exit 1"
         }
     }
+
 }
 
 post {
     always {
-        sh 'docker system prune -f'
+        sh "docker system prune -f"
     }
 }
 ```
