@@ -1,6 +1,7 @@
 pipeline {
 agent any
 
+```
 environment {
     IMAGE_NAME = "praveenindevops/nodejs"
     IMAGE_TAG = "10.0.0"
@@ -15,11 +16,14 @@ stages {
         }
     }
 
-    stage('Install Dependencies & Test') {
+    stage('Install & Test (Dockerized Node)') {
         steps {
             sh '''
-            npm install
-            npm test || true
+            docker run --rm \
+            -v $(pwd):/app \
+            -w /app \
+            node:18-alpine \
+            sh -c "npm install && npm test || true"
             '''
         }
     }
@@ -42,17 +46,6 @@ stages {
             '''
         }
     }
-
-    stage('Push Image to DockerHub') {
-        steps {
-            withCredentials([usernamePassword(credentialsId: 'docker-creds', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
-                sh '''
-                echo $PASS | docker login -u $USER --password-stdin
-                docker push $IMAGE_NAME:$IMAGE_TAG
-                '''
-            }
-        }
-    }
 }
 
 post {
@@ -60,5 +53,6 @@ post {
         sh 'docker system prune -f'
     }
 }
+```
 
 }
