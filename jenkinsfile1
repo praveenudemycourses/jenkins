@@ -1,0 +1,67 @@
+pipeline {
+agent any
+
+```
+environment {
+    IMAGE_NAME = "praveenindevops/nodejs"
+    IMAGE_TAG = "10.0.0"
+    CONTAINER_NAME = "nodejs-container"
+}
+
+stages {
+
+    stage('Checkout Code') {
+        steps {
+            git branch: 'main', url: 'https://github.com/your-repo/node-app.git'
+        }
+    }
+
+    stage('Install Dependencies & Test') {
+        steps {
+            sh '''
+            npm install
+            npm test || true
+            '''
+        }
+    }
+
+    stage('Build Docker Image') {
+        steps {
+            sh '''
+            docker build -t $IMAGE_NAME:$IMAGE_TAG .
+            '''
+        }
+    }
+
+    stage('Run Container (Smoke Test)') {
+        steps {
+            sh '''
+            docker rm -f $CONTAINER_NAME || true
+            docker run -d -p 3000:3000 --name $CONTAINER_NAME $IMAGE_NAME:$IMAGE_TAG
+            sleep 10
+            curl http://localhost:3000 || exit 1
+            '''
+        }
+    }
+
+    stage('Push Image to DockerHub') {
+        steps {
+            withCredentials([usernamePassword(credentialsId: 'docker-creds', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
+                sh '''
+                echo $PASS | docker login -u $USER --password-stdin
+                docker push $IMAGE_NAME:$IMAGE_TAG
+                '''
+            }
+        }
+    }
+}
+
+post {
+    always {
+        sh 'docker system prune -f'
+    }
+}
+```
+
+}
+
