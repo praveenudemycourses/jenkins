@@ -1,7 +1,6 @@
 pipeline {
 agent any
 
-```
 environment {
     IMAGE_NAME = "praveenindevops/nodejs"
     IMAGE_TAG = "10.0.0"
@@ -61,7 +60,5 @@ post {
         sh 'docker system prune -f'
     }
 }
-```
 
 }
-
