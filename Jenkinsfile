@@ -18,11 +18,12 @@ stages {
 
 stage('Install & Test (Dockerized Node)') {
 steps {
-sh 
+sh """
 docker run --rm -v $PWD:/app -w /app node:18-alpine sh -c "npm install && npm test || true"
+"""
+}
+}
 
-}
-}
 
     stage('Build Docker Image') {
         steps {
