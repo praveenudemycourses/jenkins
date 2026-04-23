@@ -25,13 +25,14 @@ docker run --rm -v $PWD:/app -w /app node:18-alpine sh -c "npm install && npm te
 }
 
 
-    stage('Build Docker Image') {
-        steps {
-            sh 
-            docker build -t $IMAGE_NAME:$IMAGE_TAG .
-            
-        }
-    }
+ stage('Build Docker Image') {
+steps {
+sh """
+docker build -t $IMAGE_NAME:$IMAGE_TAG .
+"""
+}
+}
+
 
     stage('Run Container (Smoke Test)') {
         steps {
